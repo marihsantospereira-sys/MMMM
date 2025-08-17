@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Formulário Monitorado</title>
+</head>
+<body>
+  <h2>Digite seu nome para começar</h2>
+
+  <!-- Caixa de texto para o nome -->
+  <input type="text" id="nomeUsuario" placeholder="Seu nome aqui">
+  <button id="comecar">Começar</button>
+
+  <!-- Container do formulário (inicialmente escondido) -->
+  <div id="formContainer" style="display:none; margin-top:20px;">
+    <iframe 
+      src="https://docs.google.com/forms/d/e/1FAIpQLSd0_-XFLcKUi71RCiOWnZ7tRcn6ZkS6PVvPyNCgD8_nf-88rA/viewform?embedded=true" 
+      width="100%" 
+      height="800" 
+      frameborder="0">
+    Carregando…
+    </iframe>
+  </div>
+
+  <script>
+    let usuario = "";
+
+    // Quando a pessoa clicar em "Começar"
+    document.getElementById("comecar").addEventListener("click", function() {
+      const nomeInput = document.getElementById("nomeUsuario").value.trim();
+      if(nomeInput === "") {
+        alert("Por favor, digite seu nome!");
+        return;
+      }
+      usuario = nomeInput;
+
+      // Esconde o input e mostra o formulário
+      document.getElementById("nomeUsuario").style.display = "none";
+      document.getElementById("comecar").style.display = "none";
+      document.getElementById("formContainer").style.display = "block";
+    });
+
+    // Função para enviar evento pro Sheets
+    function registrarEvento(evento) {
+      fetch("https://script.google.com/macros/s/AKfycbznABQOpTymKJCrUfFEyHnE5ePTKlV5EMP_EQMfy27VvVwbhapduqi0x4RWG-qxPEMY/exec", {
+        method: "POST",
+        body: JSON.stringify({
+          usuario: usuario,
+          evento: evento
+        })
+      });
+    }
+
+    // Detecta quando a aba fica escondida ou volta
+    document.addEventListener("visibilitychange", function() {
+      if(usuario !== "") { // só envia se já tiver nome
+        if (document.hidden) {
+          registrarEvento("Saiu da página");
+        } else {
+          registrarEvento("Voltou para a página");
+        }
+      }
+    });
+  </script>
+</body>
+</html>
